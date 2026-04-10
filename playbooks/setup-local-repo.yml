@@ -1,0 +1,63 @@
+---
+# Playbook: Configure Local YUM Repository on Managed Nodes
+# Points BaseOS and AppStream to the Content Server HTTP repo
+# instead of using Red Hat CDN (internet-dependent).
+
+- name: Configure Local RHEL 9.7 YUM Repository
+  hosts: managed
+  become: true
+
+  vars:
+    repo_base_url: "http://content.lab.fajjjar.my.id/rhel9"
+
+  tasks:
+    - name: Disable all existing RHUI repositories
+      ansible.builtin.shell: |
+        dnf config-manager --set-disabled '*rhui*' 2>/dev/null || true
+        rm -f /etc/yum.repos.d/redhat-rhui*.repo
+      changed_when: true
+
+    - name: Configure Local BaseOS repository
+      ansible.builtin.yum_repository:
+        name: local-baseos
+        description: "RHEL 9.7 BaseOS - Local Mirror"
+        baseurl: "{{ repo_base_url }}/BaseOS"
+        gpgcheck: false
+        enabled: true
+        sslverify: false
+
+    - name: Configure Local AppStream repository
+      ansible.builtin.yum_repository:
+        name: local-appstream
+        description: "RHEL 9.7 AppStream - Local Mirror"
+        baseurl: "{{ repo_base_url }}/AppStream"
+        gpgcheck: false
+        enabled: true
+        sslverify: false
+
+    - name: Clean DNF cache
+      ansible.builtin.command: dnf clean all
+      changed_when: true
+
+    - name: Verify repository access (list repos)
+      ansible.builtin.command: dnf repolist
+      register: repolist_output
+      changed_when: false
+
+    - name: Show active repositories
+      ansible.builtin.debug:
+        var: repolist_output.stdout_lines
+
+    - name: Test package installation (tree)
+      ansible.builtin.dnf:
+        name: tree
+        state: present
+
+    - name: Verify tree installed
+      ansible.builtin.command: tree --version
+      register: tree_version
+      changed_when: false
+
+    - name: Show tree version
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ tree_version.stdout }}"
