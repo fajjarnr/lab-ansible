@@ -58,6 +58,7 @@ terraform apply
 ```
 
 The `terraform apply` will automatically:
+
 1. Provision all 45+ AWS resources
 2. Upload RHEL ISO from Google Drive → S3 (via bastion)
 3. Download ISO to content server and mount as local HTTP repo
@@ -129,16 +130,16 @@ terraform destroy -auto-approve
 
 ## Cost Estimate
 
-| Resource | Type | Est. Monthly Cost |
-|----------|------|-------------------|
-| Bastion | t3.large | ~$60 |
-| Content Server | t3.large | ~$60 |
-| NAT Instance | t3.nano | ~$3.50 |
-| Target Servers (4x) | t3.medium | ~$120 |
-| EBS Volumes | gp3 | ~$15 |
-| S3 | Standard | ~$0.30 |
-| Route53 | Private Zone | ~$0.50 |
-| **Total** | | **~$260/mo** |
+| Resource            | Type         | Est. Monthly Cost |
+| ------------------- | ------------ | ----------------- |
+| Bastion             | t3.large     | ~$60              |
+| Content Server      | t3.large     | ~$60              |
+| NAT Instance        | t3.nano      | ~$3.50            |
+| Target Servers (4x) | t3.medium    | ~$120             |
+| EBS Volumes         | gp3          | ~$15              |
+| S3                  | Standard     | ~$0.30            |
+| Route53             | Private Zone | ~$0.50            |
+| **Total**           |              | **~$260/mo**      |
 
 > **Tip:** Destroy the lab when not in use to avoid unnecessary costs.
 

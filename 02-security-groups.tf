@@ -6,7 +6,7 @@ locals {
 }
 
 # ──────────────────────────────────────────────
-# Bastion SG — SSH from admin IP only
+# Bastion SG — SSH open to all (lab only)
 # ──────────────────────────────────────────────
 resource "aws_security_group" "bastion" {
   name_prefix = "lab-bastion-"
@@ -23,9 +23,8 @@ resource "aws_security_group_rule" "bastion_ssh_from_admin" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = [local.admin_cidr]
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.bastion.id
-  description       = "SSH from admin IP"
 }
 
 resource "aws_security_group_rule" "bastion_egress_all" {
