@@ -5,7 +5,7 @@ BASTION_IP=$1
 CONTENT_IP=$2
 BUCKET=$3
 
-SSH_OPTS="-i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o ConnectTimeout=10"
+SSH_OPTS="-i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10"
 
 echo "=========================================="
 echo "    Ansible Lab - Day 2 Automation        "
@@ -16,6 +16,9 @@ until ssh $SSH_OPTS ec2-user@$BASTION_IP "exit" 2>/dev/null; do
     echo "   Retrying in 10s..."
     sleep 10
 done
+
+echo "=> Waiting for Bastion cloud-init to complete..."
+ssh $SSH_OPTS ec2-user@$BASTION_IP "sudo cloud-init status --wait"
 
 # -------------------------------------------------------------
 # PHASE 1: Copy ISO from GDrive to S3 via Bastion (Idempotent)
@@ -33,7 +36,7 @@ else
 set -euo pipefail
 mkdir -p ~/.config/rclone && mv /tmp/rclone.conf ~/.config/rclone/rclone.conf 2>/dev/null || true
 echo \"Uploading ISO...\"
-rclone copy \"gdrive:rhel/rhel-9.7-x86_64-dvd.iso\" \"s3://$BUCKET/iso/\" --s3-region ap-southeast-1 --s3-location-constraint ap-southeast-1 --s3-no-check-bucket --progress --s3-upload-concurrency 4
+rclone copy \"gdrive:rhel/rhel-9.7-x86_64-dvd.iso\" \":s3:$BUCKET/iso/\" --s3-env-auth --s3-region ap-southeast-1 --s3-location-constraint ap-southeast-1 --s3-no-check-bucket --progress --s3-upload-concurrency 4
 echo \"Validating Checksum...\"
 aws s3 cp \"s3://$BUCKET/iso/rhel-9.7-x86_64-dvd.iso\" /tmp/rhel-check.iso --no-progress
 SHA_SUM=\$(sha256sum /tmp/rhel-check.iso | awk '{print \$1}')
@@ -55,6 +58,9 @@ until ssh $SSH_OPTS -J ec2-user@$BASTION_IP ec2-user@$CONTENT_IP "exit" 2>/dev/n
     echo "   Waiting for Content Server SSH..."
     sleep 10
 done
+
+echo "=> Waiting for Content Server cloud-init to complete..."
+ssh $SSH_OPTS -J ec2-user@$BASTION_IP ec2-user@$CONTENT_IP "sudo cloud-init status --wait"
 
 if ssh $SSH_OPTS -J ec2-user@$BASTION_IP ec2-user@$CONTENT_IP "mount | grep /var/www/html/rhel9" 2>/dev/null; then
      echo "   [SKIP] ISO is already mounted on Content Server."
@@ -91,13 +97,14 @@ echo \"Setting up systemd mount...\"
 sudo tee /etc/systemd/system/var-www-html-rhel9.mount > /dev/null << 'MOUNT'
 [Unit]
 Description=Mount RHEL 9.7 ISO
-After=local-fs.target
+After=local-fs.target mnt-iso_data.mount
+Requires=mnt-iso_data.mount
 
 [Mount]
 What=/mnt/iso_data/rhel-9.7-x86_64-dvd.iso
 Where=/var/www/html/rhel9
 Type=iso9660
-Options=loop,ro
+Options=loop,ro,context=system_u:object_r:httpd_sys_content_t:s0
 
 [Install]
 WantedBy=multi-user.target

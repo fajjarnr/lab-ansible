@@ -47,17 +47,17 @@ Internet ◄──► IGW ◄──► Public Subnet (Bastion, NAT)
 ### Content Server (`lab-content-server`)
 - **Role:** Ansible control node + local RHEL repository via HTTP
 - **Type:** `t3.large` / RHEL 9.7
-- **Network:** Private subnet, static IP `172.25.250.254`
+- **Network:** Private subnet, dynamic IP (assigned by DHCP from `172.25.250.0/24`)
 - **Storage:** 30GB root + 20GB EBS data disk (`/mnt/iso_data`)
 - **IAM:** S3 read (download ISO) + SSM read
 - **Software:** ansible-core, httpd, AWS CLI v2
-- **Mount:** RHEL ISO → `/var/www/html/rhel9` via systemd mount unit
+- **Mount:** RHEL ISO → `/var/www/html/rhel9` via systemd mount unit (SELinux context set)
 
 ### Target Servers (`lab-servera` through `lab-serverd`)
 - **Role:** Ansible managed nodes
 - **Type:** `t3.medium` / RHEL 9.7
-- **Network:** Private subnet, static IPs `.10` through `.13`
-- **Repos:** Configured to use content server's local HTTP repo
+- **Network:** Private subnet, dynamic IPs (assigned by DHCP from `172.25.250.0/24`)
+- **Repos:** Configured to use content server's local HTTP repo via DNS (`content.lab.fajjjar.my.id`)
 
 ## Security Groups
 
@@ -97,12 +97,12 @@ Private hosted zone: `lab.fajjjar.my.id`
 
 | Record | IP |
 |--------|----|
-| `bastion.lab.fajjjar.my.id` | Bastion private IP |
-| `content.lab.fajjjar.my.id` | `172.25.250.254` |
-| `servera.lab.fajjjar.my.id` | `172.25.250.10` |
-| `serverb.lab.fajjjar.my.id` | `172.25.250.11` |
-| `serverc.lab.fajjjar.my.id` | `172.25.250.12` |
-| `serverd.lab.fajjjar.my.id` | `172.25.250.13` |
+| `bastion.lab.fajjjar.my.id` | Bastion private IP (dynamic) |
+| `content.lab.fajjjar.my.id` | Content server private IP (dynamic) |
+| `servera.lab.fajjjar.my.id` | servera private IP (dynamic) |
+| `serverb.lab.fajjjar.my.id` | serverb private IP (dynamic) |
+| `serverc.lab.fajjjar.my.id` | serverc private IP (dynamic) |
+| `serverd.lab.fajjjar.my.id` | serverd private IP (dynamic) |
 
 ## Day-2 Automation Flow
 

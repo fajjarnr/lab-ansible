@@ -7,18 +7,14 @@ echo "=== Target Server ${hostname} Bootstrap ==="
 # ── Hostname ──
 hostnamectl set-hostname "${hostname}.${domain}"
 
-# ── Time sync ──
-systemctl enable --now chronyd
-chronyc makestep
 
 # ── /etc/hosts fallback ──
-if ! grep -q "content.${domain}" /etc/hosts; then
-  echo "${content_ip} content.${domain} content" >> /etc/hosts
-fi
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+cat >> /etc/hosts <<HOSTSEOF
+$LOCAL_IP ${hostname}.${domain} ${hostname}
+${content_ip} content.${domain} content
+HOSTSEOF
 
-# ── SSH hardening ──
-sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-systemctl restart sshd
+
 
 echo "=== Target Server ${hostname} Bootstrap Complete ==="

@@ -21,7 +21,7 @@ Automated multi-tier Ansible lab environment on AWS, provisioned entirely with T
 │  │                                   │                    │                 │
 │  │   ┌──────────────────────────────┐│                    │                 │
 │  │   │    Content Server            ││                    │                 │
-│  │   │    172.25.250.254            ││                    │                 │
+│  │   │    (dynamic private IP)       ││                    │                 │
 │  │   │    t3.large / RHEL 9.7       ││                    │                 │
 │  │   │    httpd + Ansible Control   ││                    │                 │
 │  │   │    20GB EBS (ISO storage)    ││                    │                 │
@@ -29,7 +29,7 @@ Automated multi-tier Ansible lab environment on AWS, provisioned entirely with T
 │  │                                   │                    │                 │
 │  │   ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌────────┐│                 │
 │  │   │ servera   │ │ serverb   │ │ serverc   │ │serverd ││                 │
-│  │   │ .250.10   │ │ .250.11   │ │ .250.12   │ │.250.13 ││                 │
+│  │   │ (dynamic) │ │ (dynamic) │ │ (dynamic) │ │(dynami)││                 │
 │  │   │ t3.medium │ │ t3.medium │ │ t3.medium │ │t3.med  ││                 │
 │  │   └───────────┘ └───────────┘ └───────────┘ └────────┘│                 │
 │  └────────────────────────────────────────────────────────┘                 │
@@ -66,17 +66,17 @@ The `terraform apply` will automatically:
 ### SSH Access
 
 ```bash
+# Get all connection details after apply
+terraform output
+
 # Bastion (direct)
-ssh -i ~/.ssh/id_ed25519 ec2-user@<BASTION_EIP>
+ssh -i ~/.ssh/id_ed25519 ec2-user@$(terraform output -raw bastion_public_ip)
 
 # Content Server (via bastion)
-ssh -i ~/.ssh/id_ed25519 -J ec2-user@<BASTION_EIP> ec2-user@172.25.250.254
+$(terraform output -raw content_server_ssh_via_bastion)
 
-# Target Servers (via bastion)
-ssh -i ~/.ssh/id_ed25519 -J ec2-user@<BASTION_EIP> ec2-user@172.25.250.10  # servera
-ssh -i ~/.ssh/id_ed25519 -J ec2-user@<BASTION_EIP> ec2-user@172.25.250.11  # serverb
-ssh -i ~/.ssh/id_ed25519 -J ec2-user@<BASTION_EIP> ec2-user@172.25.250.12  # serverc
-ssh -i ~/.ssh/id_ed25519 -J ec2-user@<BASTION_EIP> ec2-user@172.25.250.13  # serverd
+# Target Servers (via bastion — get IPs from terraform output target_server_ips)
+ssh -i ~/.ssh/id_ed25519 -J ec2-user@$(terraform output -raw bastion_public_ip) ec2-user@<TARGET_IP>
 ```
 
 ### Run Ansible
@@ -84,7 +84,7 @@ ssh -i ~/.ssh/id_ed25519 -J ec2-user@<BASTION_EIP> ec2-user@172.25.250.13  # ser
 ```bash
 # SSH to content server, then:
 ansible all -m ping
-ansible-playbook ~/setup-local-repo.yml
+ansible-playbook /home/ec2-user/playbooks/setup-local-repo.yml
 ```
 
 ## Project Structure

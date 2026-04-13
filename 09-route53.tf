@@ -30,16 +30,16 @@ resource "aws_route53_record" "content" {
   name    = "content.${var.domain}"
   type    = "A"
   ttl     = 300
-  records = ["172.25.250.254"]
+  records = [aws_instance.content_server.private_ip]
 }
 
 # Target Servers
 resource "aws_route53_record" "target" {
-  for_each = local.target_servers
+  for_each = toset(local.target_names)
 
   zone_id = aws_route53_zone.lab.zone_id
   name    = "${each.key}.${var.domain}"
   type    = "A"
   ttl     = 300
-  records = [each.value.ip]
+  records = [aws_instance.target[each.key].private_ip]
 }

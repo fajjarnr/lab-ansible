@@ -7,28 +7,17 @@ echo "=== Content Server Bootstrap ==="
 # ── Hostname ──
 hostnamectl set-hostname "content.${domain}"
 
-# ── Time sync ──
-systemctl enable --now chronyd
-chronyc makestep
-
-# ── SSH hardening ──
-sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
-sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-systemctl restart sshd
-
-# ── /etc/hosts fallback (before Route53 propagation) ──
-cat >> /etc/hosts <<'HOSTSEOF'
-${content_ip} content.${domain} content
-%{for name, server in target_hosts~}
-${server.ip} ${name}.${domain} ${name}
-%{endfor~}
+# ── /etc/hosts fallback ──
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+cat >> /etc/hosts <<HOSTSEOF
+$LOCAL_IP content.${domain} content
 HOSTSEOF
 
 # ── Dynamic disk discovery & format ──
 echo "Waiting for data disk to appear..."
 DATA_DISK=""
 for i in $(seq 1 30); do
-  DATA_DISK=$(lsblk -d -n -o NAME,SIZE | grep '20G' | awk '{print $1}' | head -1)
+  DATA_DISK=$(lsblk -d -n -o NAME,SIZE | awk '$2=="20G" {print $1}' | head -1)
   if [ -n "$DATA_DISK" ]; then
     break
   fi
@@ -66,10 +55,7 @@ pip3 install boto3 botocore 2>/dev/null || true
 # ── Install amazon.aws Ansible collection ──
 ansible-galaxy collection install amazon.aws
 
-# ── Firewall ──
-systemctl enable --now firewalld
-firewall-cmd --permanent --add-service=http
-firewall-cmd --reload
+# ── Firewall (Handled by AWS Security Group) ──
 
 # ── Start httpd ──
 mkdir -p /var/www/html/rhel9

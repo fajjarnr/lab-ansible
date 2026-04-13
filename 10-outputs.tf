@@ -19,7 +19,7 @@ output "content_server_ip" {
 
 output "content_server_ssh_via_bastion" {
   description = "SSH to content server via bastion (ProxyJump)"
-  value       = "ssh -i ~/.ssh/id_ed25519 -J ec2-user@${aws_eip.bastion.public_ip} ec2-user@172.25.250.254"
+  value       = "ssh -i ~/.ssh/id_ed25519 -J ec2-user@${aws_eip.bastion.public_ip} ec2-user@${aws_instance.content_server.private_ip}"
 }
 
 output "target_server_ips" {

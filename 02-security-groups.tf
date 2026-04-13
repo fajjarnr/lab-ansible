@@ -10,28 +10,31 @@ locals {
 # ──────────────────────────────────────────────
 resource "aws_security_group" "bastion" {
   name_prefix = "lab-bastion-"
-  description = "Bastion - SSH from admin IP only"
+  description = "Bastion Security Group"
   vpc_id      = aws_vpc.lab.id
-
-  ingress {
-    description = "SSH from admin IP"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [local.admin_cidr]
-  }
-
-  egress {
-    description = "All outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   tags = { Name = "lab-bastion-sg" }
 
   lifecycle { create_before_destroy = true }
+}
+
+resource "aws_security_group_rule" "bastion_ssh_from_admin" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = [local.admin_cidr]
+  security_group_id = aws_security_group.bastion.id
+  description       = "SSH from admin IP"
+}
+
+resource "aws_security_group_rule" "bastion_egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.bastion.id
 }
 
 # ──────────────────────────────────────────────
@@ -39,28 +42,39 @@ resource "aws_security_group" "bastion" {
 # ──────────────────────────────────────────────
 resource "aws_security_group" "nat" {
   name_prefix = "lab-nat-"
-  description = "NAT instance - traffic from private subnet"
+  description = "NAT instance security group"
   vpc_id      = aws_vpc.lab.id
-
-  ingress {
-    description = "All from private subnet"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [var.private_subnet_cidr]
-  }
-
-  egress {
-    description = "All outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   tags = { Name = "lab-nat-sg" }
 
   lifecycle { create_before_destroy = true }
+}
+
+resource "aws_security_group_rule" "nat_ingress_private" {
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = [var.private_subnet_cidr]
+  security_group_id = aws_security_group.nat.id
+}
+
+resource "aws_security_group_rule" "nat_ingress_admin_ssh" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = [local.admin_cidr]
+  security_group_id = aws_security_group.nat.id
+}
+
+resource "aws_security_group_rule" "nat_egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.nat.id
 }
 
 # ──────────────────────────────────────────────
@@ -68,28 +82,30 @@ resource "aws_security_group" "nat" {
 # ──────────────────────────────────────────────
 resource "aws_security_group" "content_server" {
   name_prefix = "lab-content-"
-  description = "Content server - SSH from bastion, HTTP from targets"
+  description = "Content server security group"
   vpc_id      = aws_vpc.lab.id
-
-  ingress {
-    description     = "SSH from bastion"
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    security_groups = [aws_security_group.bastion.id]
-  }
-
-  egress {
-    description = "All outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   tags = { Name = "lab-content-sg" }
 
   lifecycle { create_before_destroy = true }
+}
+
+resource "aws_security_group_rule" "content_ssh_from_bastion" {
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.content_server.id
+}
+
+resource "aws_security_group_rule" "content_egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.content_server.id
 }
 
 # ──────────────────────────────────────────────
@@ -97,31 +113,39 @@ resource "aws_security_group" "content_server" {
 # ──────────────────────────────────────────────
 resource "aws_security_group" "target_servers" {
   name_prefix = "lab-target-"
-  description = "Target servers - SSH from bastion + content server"
+  description = "Target servers security group"
   vpc_id      = aws_vpc.lab.id
-
-  ingress {
-    description = "SSH from bastion and content server"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    security_groups = [
-      aws_security_group.bastion.id,
-      aws_security_group.content_server.id
-    ]
-  }
-
-  egress {
-    description = "All outbound"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   tags = { Name = "lab-target-sg" }
 
   lifecycle { create_before_destroy = true }
+}
+
+resource "aws_security_group_rule" "target_ssh_from_bastion" {
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.target_servers.id
+}
+
+resource "aws_security_group_rule" "target_ssh_from_content" {
+  type                     = "ingress"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.content_server.id
+  security_group_id        = aws_security_group.target_servers.id
+}
+
+resource "aws_security_group_rule" "target_egress_all" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.target_servers.id
 }
 
 # ──────────────────────────────────────────────

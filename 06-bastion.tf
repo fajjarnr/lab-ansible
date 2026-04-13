@@ -18,6 +18,11 @@ resource "aws_instance" "bastion" {
     volume_type = "gp3"
   }
 
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
   tags = { Name = "lab-bastion" }
 
   lifecycle {

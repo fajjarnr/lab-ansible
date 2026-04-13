@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-BUCKET="lab-ansible-42813f"
+BUCKET="${1:?Usage: $0 <bucket-name>}"
 
 echo "1. Uploading ISO from GDrive to S3..."
 rclone copy "gdrive:rhel/rhel-9.7-x86_64-dvd.iso" \
