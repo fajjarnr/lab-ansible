@@ -6,6 +6,6 @@ ansible-navigator:
     image: registry.redhat.io/ansible-automation-platform-26/ee-supported-rhel9:latest
     pull:
       policy: missing
-      # arguments:
-      #   - "--tls-verify=false"
   mode: stdout
+  playbook-artifact:
+    enable: false

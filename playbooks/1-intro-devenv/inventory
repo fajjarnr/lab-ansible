@@ -1,1 +1,5 @@
+[web]
 servera ansible_host=172.25.250.238
+serverb ansible_host=172.25.250.11
+serverc ansible_host=172.25.250.55
+serverd ansible_host=172.25.250.8
