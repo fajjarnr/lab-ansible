@@ -5,7 +5,7 @@ BASTION_IP=$1
 CONTENT_IP=$2
 BUCKET=$3
 
-SSH_OPTS="-i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10"
+SSH_OPTS="-i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -o ServerAliveInterval=60 -o ServerAliveCountMax=10"
 
 echo "=========================================="
 echo "    Ansible Lab - Day 2 Automation        "

@@ -46,7 +46,7 @@ resource "aws_volume_attachment" "content_data" {
 # Generated Ansible Inventory
 # ──────────────────────────────────────────────
 resource "local_file" "ansible_inventory" {
-  filename        = "${path.module}/inventory/hosts.ini"
+  filename        = "${path.module}/playbooks/inventory/hosts.ini"
   file_permission = "0644"
 
   content = <<-EOT
@@ -54,10 +54,6 @@ resource "local_file" "ansible_inventory" {
     content.${var.domain} ansible_host=${aws_instance.content_server.private_ip}
 
     [managed]
-    ${join("\n", [for name in local.target_names : "${name}.${var.domain} ansible_host=${aws_instance.target[name].private_ip}"])}
-
-    [all:vars]
-    ansible_user=ec2-user
-    ansible_ssh_private_key_file=~/.ssh/id_ed25519
+    $${join("\n", [for name in local.target_names : "$${name}.$${var.domain} ansible_host=$${aws_instance.target[name].private_ip}"])}
   EOT
 }
