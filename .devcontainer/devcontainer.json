@@ -1,5 +1,5 @@
 {
-  "name": "ansible-dev-container-codespaces",
+  "name": "ansible-dev-container",
   "image": "registry.redhat.io/ansible-automation-platform-26/ansible-dev-tools-rhel9:latest",
   "containerUser": "root",
   "runArgs": [
