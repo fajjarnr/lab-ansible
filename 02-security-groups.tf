@@ -159,6 +159,17 @@ resource "aws_security_group_rule" "content_http_from_targets" {
   security_group_id        = aws_security_group.content_server.id
   description              = "HTTP from target servers for yum repo"
 }
+
+resource "aws_security_group_rule" "content_http_from_bastion" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.content_server.id
+  description              = "HTTP from bastion host"
+}
+
 resource "aws_security_group_rule" "nat_from_bastion" {
   type                     = "ingress"
   from_port                = 22
@@ -167,5 +178,28 @@ resource "aws_security_group_rule" "nat_from_bastion" {
   source_security_group_id = aws_security_group.bastion.id
   security_group_id        = aws_security_group.nat.id
   description              = "SSH from Bastion"
+}
+
+# ──────────────────────────────────────────────
+# ICMP (Ping) cross-rules from Bastion
+# ──────────────────────────────────────────────
+resource "aws_security_group_rule" "content_icmp_from_bastion" {
+  type                     = "ingress"
+  from_port                = -1
+  to_port                  = -1
+  protocol                 = "icmp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.content_server.id
+  description              = "Allow Ping from Bastion"
+}
+
+resource "aws_security_group_rule" "target_icmp_from_bastion" {
+  type                     = "ingress"
+  from_port                = -1
+  to_port                  = -1
+  protocol                 = "icmp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.target_servers.id
+  description              = "Allow Ping from Bastion"
 }
 

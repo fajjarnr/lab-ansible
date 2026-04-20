@@ -54,6 +54,6 @@ resource "local_file" "ansible_inventory" {
     content.${var.domain} ansible_host=${aws_instance.content_server.private_ip}
 
     [managed]
-    $${join("\n", [for name in local.target_names : "$${name}.$${var.domain} ansible_host=$${aws_instance.target[name].private_ip}"])}
+    ${join("\n", [for name in local.target_names : "${name}.${var.domain} ansible_host=${aws_instance.target[name].private_ip}"])}
   EOT
 }
