@@ -1,0 +1,8 @@
+[content]
+content ansible_host=content.lab.fajjjar.my.id
+
+[all]
+servera ansible_host=servera.lab.fajjjar.my.id
+serverb ansible_host=serverb.lab.fajjjar.my.id
+serverc ansible_host=serverc.lab.fajjjar.my.id
+serverd ansible_host=serverd.lab.fajjjar.my.id
