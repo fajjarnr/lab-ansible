@@ -1,0 +1,10 @@
+[prod]
+servera.lab.fajjjar.my.id
+serverb.lab.fajjjar.my.id
+
+[test]
+serverc.lab.fajjjar.my.id
+serverd.lab.fajjjar.my.id
+
+[all]
+server[a:d].lab.fajjjar.my.id

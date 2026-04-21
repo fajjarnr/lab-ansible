@@ -1,0 +1,6 @@
+---
+- name: testing authentication with production server
+  hosts: all
+  tasks:
+    - name: ping production server
+      ansible.builtin.ping:
