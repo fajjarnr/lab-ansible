@@ -54,6 +54,18 @@ This project was built through an AI pair-programming session using Gemini/Claud
 
 **Fix:** Added AWS CLI installation (with `unzip` dependency) directly in the Day-2 automation script, ensuring it runs after NAT is fully operational.
 
+### 6. SSH Broken Pipe — Running Long-Running Automation in Background
+
+**Problem:** During the execution of `day2-automation.sh`, which transfers the large 12.6GB RHEL ISO file via `rclone copy` on the Bastion and downloads it on the Content Server, the local SSH connection would frequently drop with a `client_loop: send disconnect: Broken pipe` or `Connection reset by peer` error. Since the execution was synchronous, the SSH daemon on the Bastion killed the active process, failing the migration.
+
+**Root Cause:** Synchronous SSH executions rely on the local terminal's connection remaining open and stable. Any Wi-Fi hiccups or long-idle SSH sessions will lead to connection timeouts/disconnects.
+
+**Fix:**
+1. Split the execution scripts into modular templates: `scripts/setup_content.sh.tpl` and `scripts/bastion_day2.sh.tpl`.
+2. Modified the entrypoint script `scripts/day2-automation.sh` to generate the final scripts locally by doing placeholder replacement (`sed`) to avoid nested heredoc escaping hell.
+3. Securely copied the SSH private key (`~/.ssh/id_ed25519`) and configs to the Bastion.
+4. Detached the execution on the Bastion using `nohup /tmp/bastion_day2.sh > /tmp/bastion_day2.log 2>&1 < /dev/null &` and exited immediately with clear instructions on how the user can tail the background logs.
+
 ## Design Insights
 
 1. **VPC Endpoint policies are tricky.** AWS services (including their own OS mirrors) rely on S3. A restrictive endpoint policy can break fundamental operations like `dnf install`.
