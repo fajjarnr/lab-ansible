@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.2.0] - 2026-08-18
+
+### Changed
+- Replaced Google Drive + `rclone` + S3 pipeline with direct automated download of **Rocky Linux 9.8 DVD ISO** (100% binary-compatible with RHEL 9).
+- Removed unused S3 bucket (`04-s3.tf`) and simplified IAM policies / outputs, reducing AWS storage costs.
+- Upgraded NAT instance to `t3.small` and added `Environment = "sandbox"` tagging across all resources to prevent AWS Organization Lambda auto-stop policies.
+- Content server EBS data disk increased to 30GB with dynamic non-root block device detection.
+- Added `/var/www/html/rhel` symlink to `/var/www/html/rhel9` for dual URL path compatibility.
+- Added TCP MSS clamping rule (`TCPMSS --clamp-mss-to-pmtu`) to NAT instance iptables to prevent PMTU blackholes.
+
 ## [1.1.0] - 2026-04-13
 
 ### Fixed

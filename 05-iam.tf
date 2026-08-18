@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "ec2_assume_role" {
 }
 
 # ──────────────────────────────────────────────
-# Bastion IAM Role — S3 upload + SSM read
+# Bastion IAM Role — SSM read
 # ──────────────────────────────────────────────
 resource "aws_iam_role" "bastion" {
   name               = "lab-ansible-bastion-role"
@@ -28,21 +28,6 @@ resource "aws_iam_role_policy" "bastion" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Sid    = "S3Access"
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject", 
-          "s3:AbortMultipartUpload", 
-          "s3:GetObject", 
-          "s3:ListBucket"
-        ]
-        Resource = [
-          aws_s3_bucket.lab.arn,
-          "${aws_s3_bucket.lab.arn}/iso/*",
-          "${aws_s3_bucket.lab.arn}/status/*"
-        ]
-      },
       {
         Sid      = "SSMRead"
         Effect   = "Allow"
@@ -59,7 +44,7 @@ resource "aws_iam_instance_profile" "bastion" {
 }
 
 # ──────────────────────────────────────────────
-# Content Server IAM Role — S3 download + SSM read
+# Content Server IAM Role — SSM read
 # ──────────────────────────────────────────────
 resource "aws_iam_role" "content_server" {
   name               = "lab-ansible-content-role"
@@ -74,12 +59,6 @@ resource "aws_iam_role_policy" "content_server" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Sid      = "S3Download"
-        Effect   = "Allow"
-        Action   = ["s3:GetObject", "s3:ListBucket"]
-        Resource = [aws_s3_bucket.lab.arn, "${aws_s3_bucket.lab.arn}/*"]
-      },
       {
         Sid      = "SSMRead"
         Effect   = "Allow"

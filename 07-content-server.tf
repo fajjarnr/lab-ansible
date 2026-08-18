@@ -29,7 +29,7 @@ resource "aws_instance" "content_server" {
 # Separate EBS data disk (Terraform AWS Provider v5+ — no ebs_block_device)
 resource "aws_ebs_volume" "content_data" {
   availability_zone = aws_instance.content_server.availability_zone
-  size              = 20
+  size              = 30
   type              = "gp3"
 
   tags = { Name = "lab-content-data-disk" }

@@ -46,8 +46,6 @@ Automated multi-tier Ansible lab environment on AWS, provisioned entirely with T
 - Terraform >= 1.5
 - AWS CLI v2 configured (`aws sts get-caller-identity`)
 - SSH key at `~/.ssh/id_ed25519.pub`
-- rclone configured with Google Drive remote (`~/.config/rclone/rclone.conf`)
-- RHEL 9.7 ISO on Google Drive at `gdrive:rhel/rhel-9.7-x86_64-dvd.iso`
 
 ### Deploy
 
@@ -59,10 +57,10 @@ terraform apply
 
 The `terraform apply` will automatically:
 
-1. Provision all 45+ AWS resources
-2. Upload RHEL ISO from Google Drive → S3 (via bastion)
-3. Download ISO to content server and mount as local HTTP repo
-4. Generate Ansible inventory at `inventory/hosts.ini`
+1. Provision all AWS resources
+2. Automatically download Rocky Linux 9.8 DVD ISO from official CDN to Content Server (via background job)
+3. Mount ISO as local HTTP repository (`/var/www/html/rhel9` for BaseOS + AppStream)
+4. Generate Ansible inventory at `playbooks/inventory/hosts.ini`
 
 ### SSH Access
 

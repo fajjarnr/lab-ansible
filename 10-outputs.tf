@@ -29,11 +29,6 @@ output "target_server_ips" {
   }
 }
 
-output "s3_bucket_name" {
-  description = "S3 bucket name for ISO storage"
-  value       = aws_s3_bucket.lab.bucket
-}
-
 output "rhel_ami_id" {
   description = "RHEL 9.7 AMI ID used"
   value       = data.aws_ami.rhel.id

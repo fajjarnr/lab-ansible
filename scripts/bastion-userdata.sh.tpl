@@ -14,7 +14,4 @@ cd /tmp && unzip -qo awscliv2.zip
 /tmp/aws/install --update
 rm -rf /tmp/aws /tmp/awscliv2.zip
 
-# Install rclone (for GDrive → S3 ISO transfer)
-curl -sL https://rclone.org/install.sh | bash
-
 echo "=== Bastion Bootstrap Complete ==="

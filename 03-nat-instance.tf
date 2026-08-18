@@ -4,7 +4,7 @@
 # ──────────────────────────────────────────────
 resource "aws_instance" "nat" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = "t3.nano"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.public.id
   source_dest_check      = false # Required for NAT
   vpc_security_group_ids = [aws_security_group.nat.id]
@@ -24,7 +24,10 @@ resource "aws_instance" "nat" {
     http_tokens   = "required"
   }
 
-  tags = { Name = "lab-nat-instance" }
+  tags = {
+    Name        = "lab-nat-instance"
+    Environment = "sandbox"
+  }
 
   depends_on = [aws_route.public_internet]
 }

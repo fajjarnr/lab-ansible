@@ -3,7 +3,6 @@ set -euo pipefail
 
 BASTION_IP=$1
 CONTENT_IP=$2
-BUCKET=$3
 
 SSH_OPTS="-i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -o ServerAliveInterval=60 -o ServerAliveCountMax=10"
 
@@ -25,23 +24,19 @@ ssh $SSH_OPTS ec2-user@$BASTION_IP "sudo cloud-init status --wait"
 # -------------------------------------------------------------
 echo "=> Generating automation scripts..."
 
-# Create a temporary directory for generated files in the workspace (safe and self-contained)
 SCRIPT_DIR="$(dirname "$0")"
 mkdir -p "$SCRIPT_DIR/.generated"
 
-# Generate setup_content.sh
-sed "s/__BUCKET__/$BUCKET/g" "$SCRIPT_DIR/setup_content.sh.tpl" > "$SCRIPT_DIR/.generated/setup_content.sh"
+# Copy setup_content.sh
+cp "$SCRIPT_DIR/setup_content.sh.tpl" "$SCRIPT_DIR/.generated/setup_content.sh"
 
 # Generate bastion_day2.sh
-sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__CONTENT_IP__/$CONTENT_IP/g" "$SCRIPT_DIR/bastion_day2.sh.tpl" > "$SCRIPT_DIR/.generated/bastion_day2.sh"
+sed "s/__CONTENT_IP__/$CONTENT_IP/g" "$SCRIPT_DIR/bastion_day2.sh.tpl" > "$SCRIPT_DIR/.generated/bastion_day2.sh"
 
 echo "=> Transferring configurations and scripts to Bastion..."
 # Transfer SSH Private Key to Bastion so it can connect to Content Server
 scp $SSH_OPTS ~/.ssh/id_ed25519 ec2-user@$BASTION_IP:~/.ssh/id_ed25519
 ssh $SSH_OPTS ec2-user@$BASTION_IP "chmod 600 ~/.ssh/id_ed25519"
-
-# Transfer rclone config
-scp $SSH_OPTS ~/.config/rclone/rclone.conf ec2-user@$BASTION_IP:/tmp/rclone.conf || true
 
 # Transfer scripts
 scp $SSH_OPTS "$SCRIPT_DIR/.generated/setup_content.sh" ec2-user@$BASTION_IP:/tmp/setup_content.sh

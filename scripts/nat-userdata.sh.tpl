@@ -15,6 +15,7 @@ dnf install -y iptables
 iptables -t nat -A POSTROUTING -s ${private_cidr} -j MASQUERADE
 iptables -A FORWARD -s ${private_cidr} -j ACCEPT
 iptables -A FORWARD -d ${private_cidr} -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 # Persist iptables rules
 mkdir -p /etc/sysconfig

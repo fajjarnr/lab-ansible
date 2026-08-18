@@ -17,7 +17,7 @@ HOSTSEOF
 echo "Waiting for data disk to appear..."
 DATA_DISK=""
 for i in $(seq 1 30); do
-  DATA_DISK=$(lsblk -d -n -o NAME,SIZE | awk '$2=="20G" {print $1}' | head -1)
+  DATA_DISK=$(lsblk -d -n -o NAME,TYPE | awk '$2=="disk" && $1!="nvme0n1" && $1!="xvda" {print $1}' | head -1)
   if [ -n "$DATA_DISK" ]; then
     break
   fi
@@ -26,7 +26,7 @@ for i in $(seq 1 30); do
 done
 
 if [ -z "$DATA_DISK" ]; then
-  echo "ERROR: Data disk 20GB not found after 5 minutes!" >&2
+  echo "ERROR: Data disk not found after 5 minutes!" >&2
   # Continue without data disk — don't block entire bootstrap
   echo "WARNING: Proceeding without data disk. Mount manually later."
 else

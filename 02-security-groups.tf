@@ -67,6 +67,7 @@ resource "aws_security_group_rule" "nat_ingress_admin_ssh" {
   security_group_id = aws_security_group.nat.id
 }
 
+
 resource "aws_security_group_rule" "nat_egress_all" {
   type              = "egress"
   from_port         = 0

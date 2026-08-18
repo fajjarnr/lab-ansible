@@ -21,8 +21,9 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project   = "lab-ansible"
-      ManagedBy = "terraform"
+      Project     = "lab-ansible"
+      ManagedBy   = "terraform"
+      Environment = "sandbox"
     }
   }
 }
