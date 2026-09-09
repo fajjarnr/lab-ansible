@@ -5,6 +5,7 @@
   "runArgs": [
     "--cap-add=CAP_MKNOD",
     "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
     "--cap-add=SYS_ADMIN",
     "--cap-add=SYS_RESOURCE",
     "--device",
