@@ -1,0 +1,4 @@
+172.250.25.11 servera.lab.ansible.com servera
+172.250.25.12 serverb.lab.ansible.com serverb
+172.250.25.13 serverc.lab.ansible.com serverc
+172.250.25.14 serverd.lab.ansible.com serverd

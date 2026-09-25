@@ -1,6 +1,6 @@
 {
-  "name": "ansible-dev-container",
-  "image": "registry.redhat.io/ansible-automation-platform-26/ansible-dev-tools-rhel9:latest",
+  "name": "ansible-dev-tools",
+  "image": "registry.redhat.io/ansible-automation-platform-26/ansible-dev-tools-rhel9:26.1.0",
   "containerUser": "root",
   "runArgs": [
     "--cap-add=CAP_MKNOD",
@@ -19,7 +19,9 @@
     "--security-opt",
     "unmask=/sys/fs/cgroup",
     "--userns=host",
-    "--hostname=ansible-dev-container"
+    "--hostname=ansible-dev-tools",
+    "--name",
+    "ansible-dev-tools"
   ],
   "updateRemoteUserUID": true,
   "customizations": {

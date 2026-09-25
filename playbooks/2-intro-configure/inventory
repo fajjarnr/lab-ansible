@@ -1,10 +1,10 @@
 [prod]
-servera.lab.fajjjar.my.id
-serverb.lab.fajjjar.my.id
+servera
+serverb
 
 [test]
-serverc.lab.fajjjar.my.id
-serverd.lab.fajjjar.my.id
+serverc
+serverd
 
 [all]
-server[a:d].lab.fajjjar.my.id
+server[a:d]

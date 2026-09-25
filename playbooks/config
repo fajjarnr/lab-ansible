@@ -1,0 +1,19 @@
+Host material
+  HostName 172.25.250.128
+  User redhat
+
+Host servera
+  HostName 172.25.250.11
+  User redhat
+
+Host serverb
+  HostName 172.25.250.12
+  User redhat
+
+Host serverc
+  HostName 172.25.250.13
+  User redhat
+
+Host serverd
+  HostName 172.25.250.14
+  User redhat
