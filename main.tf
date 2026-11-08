@@ -32,7 +32,7 @@ provider "aws" {
 # Data Sources
 # ──────────────────────────────────────────────
 
-# RHEL 9.7 AMI — TODO: UPDATE_ON_RELEASE
+# RHEL 9.8 AMI — TODO: UPDATE_ON_RELEASE
 data "aws_ami" "rhel" {
   most_recent = true
   owners      = ["309956199498"]

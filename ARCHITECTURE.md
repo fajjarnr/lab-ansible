@@ -34,7 +34,7 @@ Internet ◄──► IGW ◄──► Public Subnet (Bastion, NAT)
 ### Bastion Host (`lab-bastion`)
 
 - **Role:** SSH gateway, ISO upload executor
-- **Type:** `t3.large` / RHEL 9.7
+- **Type:** `t3.large` / RHEL 9.8
 - **Network:** Public subnet with Elastic IP
 - **IAM:** S3 read/write (iso/_, status/_) + SSM read
 - **Software:** AWS CLI v2, rclone (GDrive transfer)
@@ -49,7 +49,7 @@ Internet ◄──► IGW ◄──► Public Subnet (Bastion, NAT)
 ### Content Server (`lab-content-server`)
 
 - **Role:** Ansible control node + local RHEL repository via HTTP
-- **Type:** `t3.large` / RHEL 9.7
+- **Type:** `t3.large` / RHEL 9.8
 - **Network:** Private subnet, dynamic IP (assigned by DHCP from `172.25.250.0/24`)
 - **Storage:** 30GB root + 20GB EBS data disk (`/mnt/iso_data`)
 - **IAM:** S3 read (download ISO) + SSM read
@@ -59,7 +59,7 @@ Internet ◄──► IGW ◄──► Public Subnet (Bastion, NAT)
 ### Target Servers (`lab-servera` through `lab-serverd`)
 
 - **Role:** Ansible managed nodes
-- **Type:** `t3.medium` / RHEL 9.7
+- **Type:** `t3.medium` / RHEL 9.9
 - **Network:** Private subnet, dynamic IPs (assigned by DHCP from `172.25.250.0/24`)
 - **Repos:** Configured to use content server's local HTTP repo via DNS (`content.lab.fajjjar.my.id`)
 

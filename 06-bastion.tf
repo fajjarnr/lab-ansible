@@ -28,7 +28,7 @@ resource "aws_instance" "bastion" {
   lifecycle {
     precondition {
       condition     = data.aws_ami.rhel.id != ""
-      error_message = "RHEL 9.7 AMI not found in ${var.aws_region}. Verify AMI filter."
+      error_message = "RHEL 9.8 AMI not found in ${var.aws_region}. Verify AMI filter."
     }
   }
 

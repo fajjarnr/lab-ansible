@@ -3,12 +3,12 @@
 # Points BaseOS and AppStream to the Content Server HTTP repo
 # instead of using Red Hat CDN (internet-dependent).
 
-- name: Configure Local RHEL 9.7 YUM Repository
+- name: Configure Local RHEL 9.8 YUM Repository
   hosts: managed
   become: true
 
   vars:
-    repo_base_url: "http://content.lab.fajjjar.my.id/rhel9"
+    repo_base_url: 'http://content.lab.fajjjar.my.id/rhel9'
 
   tasks:
     - name: Disable all existing RHUI repositories
@@ -20,8 +20,8 @@
     - name: Configure Local BaseOS repository
       ansible.builtin.yum_repository:
         name: local-baseos
-        description: "RHEL 9.7 BaseOS - Local Mirror"
-        baseurl: "{{ repo_base_url }}/BaseOS"
+        description: 'RHEL 9.8 BaseOS - Local Mirror'
+        baseurl: '{{ repo_base_url }}/BaseOS'
         gpgcheck: false
         enabled: true
         sslverify: false
@@ -29,8 +29,8 @@
     - name: Configure Local AppStream repository
       ansible.builtin.yum_repository:
         name: local-appstream
-        description: "RHEL 9.7 AppStream - Local Mirror"
-        baseurl: "{{ repo_base_url }}/AppStream"
+        description: 'RHEL 9.8 AppStream - Local Mirror'
+        baseurl: '{{ repo_base_url }}/AppStream'
         gpgcheck: false
         enabled: true
         sslverify: false
@@ -60,4 +60,4 @@
 
     - name: Show tree version
       ansible.builtin.debug:
-        msg: "{{ inventory_hostname }}: {{ tree_version.stdout }}"
+        msg: '{{ inventory_hostname }}: {{ tree_version.stdout }}'

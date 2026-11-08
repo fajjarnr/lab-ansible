@@ -3,19 +3,19 @@
 **Versi:** 10.0 (Final - Implemented)
 **Status:** Completed
 **Domain Lab:** `lab.fajjjar.my.id`
-**OS Target:** Red Hat Enterprise Linux 9.7
+**OS Target:** Red Hat Enterprise Linux 9.8
 
 ---
 
 ## Changelog
 
-| Versi   | Perubahan Utama                                                                                                                                                                                                     |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 6.0     | Arsitektur dasar, flag-driven pipeline                                                                                                                                                                              |
-| 7.0     | Koreksi S3 URI, dynamic disk discovery, SELinux, SSM Secrets, Terraform EBS v5+, timeout flag, inventory mechanism                                                                                                  |
-| 8.0     | Perbaikan fstab ISO → systemd mount unit, IAM JSON lengkap, sinkronisasi path inventory, SHA256 validation, SSH key via SSM, `/etc/hosts` fallback, NAT cost mitigation, chrony, cleanup plan                       |
-| **9.0** | Perbaikan checksum streaming Bastion, systemd unit escaping `mnt\-iso_data`, Ansible SSM lookup plugin fix, Terraform provisioner race condition, SSH hardening, logrotate, Terraform `precondition` AMI validation |
-| **10.0**| Implementasi final yang sukses! Automasi Day-2 via shell script dipadukan null_resource Terraform, perbaikan S3 Gateway Endpoint untuk AL2023 OS, dan perbaikan mount unit systemd. Ansible Playbook 100% SUCCESS. |
+| Versi    | Perubahan Utama                                                                                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 6.0      | Arsitektur dasar, flag-driven pipeline                                                                                                                                                                              |
+| 7.0      | Koreksi S3 URI, dynamic disk discovery, SELinux, SSM Secrets, Terraform EBS v5+, timeout flag, inventory mechanism                                                                                                  |
+| 8.0      | Perbaikan fstab ISO → systemd mount unit, IAM JSON lengkap, sinkronisasi path inventory, SHA256 validation, SSH key via SSM, `/etc/hosts` fallback, NAT cost mitigation, chrony, cleanup plan                       |
+| **9.0**  | Perbaikan checksum streaming Bastion, systemd unit escaping `mnt\-iso_data`, Ansible SSM lookup plugin fix, Terraform provisioner race condition, SSH hardening, logrotate, Terraform `precondition` AMI validation |
+| **10.0** | Implementasi final yang sukses! Automasi Day-2 via shell script dipadukan null_resource Terraform, perbaikan S3 Gateway Endpoint untuk AL2023 OS, dan perbaikan mount unit systemd. Ansible Playbook 100% SUCCESS.  |
 
 ---
 
@@ -56,7 +56,7 @@
 ### 2.3 AMI Target
 
 ```
-RHEL-9.7.0_HVM-20260303-x86_64-0-Hourly2-GP3
+RHEL-9.8.0_HVM-20260303-x86_64-0-Hourly2-GP3
 ```
 
 > **⚠ Wajib verifikasi sebelum deploy.** AMI ID bersifat region-specific. Tandai sebagai `# TODO: UPDATE_ON_RELEASE` di Terraform. Verifikasi dengan:
@@ -64,7 +64,7 @@ RHEL-9.7.0_HVM-20260303-x86_64-0-Hourly2-GP3
 > ```bash
 > aws ec2 describe-images \
 >   --owners 309956199498 \
->   --filters 'Name=name,Values=RHEL-9.7*' \
+>   --filters 'Name=name,Values=RHEL-9.8*' \
 >   --query 'Images[*].[ImageId,Name,CreationDate]' \
 >   --region <YOUR_REGION>
 > ```
@@ -263,7 +263,7 @@ data "aws_ami" "rhel" {
   owners      = ["309956199498"]
   filter {
     name   = "name"
-    values = ["RHEL-9.7*"]
+    values = ["RHEL-9.8*"]
   }
 }
 
@@ -273,7 +273,7 @@ resource "aws_instance" "content_server" {
   lifecycle {
     precondition {
       condition     = data.aws_ami.rhel.id != ""
-      error_message = "RHEL 9.7 AMI tidak ditemukan di region ini. Verifikasi filter AMI."
+      error_message = "RHEL 9.8 AMI tidak ditemukan di region ini. Verifikasi filter AMI."
     }
   }
 }
@@ -315,7 +315,7 @@ token = ${RCLONE_TOKEN}
 EOF
 
 # Upload ISO: GDrive → S3 langsung (tidak ada file lokal)
-rclone copy "gdrive:rhel/rhel-9.7-x86_64-dvd.iso" \
+rclone copy "gdrive:rhel/rhel-9.8-x86_64-dvd.iso" \
   "s3://${BUCKET}/iso/" \
   --progress \
   --s3-upload-concurrency 4
@@ -328,7 +328,7 @@ fi
 # Generate checksum: download sementara ke /tmp hanya untuk hashing
 # (ISO tidak tersimpan lokal saat rclone GDrive→S3, jadi harus diunduh ulang sesaat)
 echo "Mengunduh ISO sementara ke /tmp untuk hashing..."
-aws s3 cp "s3://${BUCKET}/iso/rhel-9.7-x86_64-dvd.iso" \
+aws s3 cp "s3://${BUCKET}/iso/rhel-9.8-x86_64-dvd.iso" \
   /tmp/rhel-check.iso --no-progress
 
 SHA_SUM=$(sha256sum /tmp/rhel-check.iso | awk '{print $1}')
@@ -336,7 +336,7 @@ echo "${SHA_SUM}" > /tmp/rhel.sha256
 
 # Upload checksum ke S3
 aws s3 cp /tmp/rhel.sha256 \
-  "s3://${BUCKET}/iso/rhel-9.7-x86_64-dvd.iso.sha256"
+  "s3://${BUCKET}/iso/rhel-9.8-x86_64-dvd.iso.sha256"
 
 # Cleanup file temp
 rm -f /tmp/rhel-check.iso /tmp/rhel.sha256
@@ -417,13 +417,13 @@ echo "Flag terdeteksi. Memulai download ISO..."
 #### Langkah 3: Download ISO + Validasi SHA256
 
 ```bash
-aws s3 cp "s3://${BUCKET}/iso/rhel-9.7-x86_64-dvd.iso" \
-  /mnt/iso_data/rhel-9.7-x86_64-dvd.iso \
+aws s3 cp "s3://${BUCKET}/iso/rhel-9.8-x86_64-dvd.iso" \
+  /mnt/iso_data/rhel-9.8-x86_64-dvd.iso \
   --no-progress
 
 # Validasi integritas
-EXPECTED_SUM=$(aws s3 cp "s3://${BUCKET}/iso/rhel-9.7-x86_64-dvd.iso.sha256" -)
-ACTUAL_SUM=$(sha256sum /mnt/iso_data/rhel-9.7-x86_64-dvd.iso | awk '{print $1}')
+EXPECTED_SUM=$(aws s3 cp "s3://${BUCKET}/iso/rhel-9.8-x86_64-dvd.iso.sha256" -)
+ACTUAL_SUM=$(sha256sum /mnt/iso_data/rhel-9.8-x86_64-dvd.iso | awk '{print $1}')
 
 if [ "$EXPECTED_SUM" != "$ACTUAL_SUM" ]; then
   echo "ERROR: SHA256 mismatch! ISO korup atau tidak lengkap." >&2
@@ -447,7 +447,7 @@ After=network.target local-fs.target mnt\-iso_data.mount
 Requires=mnt\-iso_data.mount
 
 [Mount]
-What=/mnt/iso_data/rhel-9.7-x86_64-dvd.iso
+What=/mnt/iso_data/rhel-9.8-x86_64-dvd.iso
 Where=/var/www/html/rhel9
 Type=iso9660
 Options=loop,ro
@@ -699,7 +699,7 @@ echo "Cleanup selesai. Tidak ada resource aktif."
 
 ## 10. Checklist Final Go/No-Go Sebelum `terraform apply`
 
-- [ ] AMI ID `RHEL-9.7.0_HVM-*` tersedia di region target (verifikasi via `aws ec2 describe-images`)
+- [ ] AMI ID `RHEL-9.8.0_HVM-*` tersedia di region target (verifikasi via `aws ec2 describe-images`)
 - [ ] Kepemilikan domain `fajjjar.my.id` dikonfirmasi untuk Route53 delegation
 - [ ] Token rclone di SSM sebagai `SecureString`
 - [ ] SSH public key di SSM sebagai `String`

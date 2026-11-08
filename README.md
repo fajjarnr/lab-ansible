@@ -12,7 +12,7 @@ Automated multi-tier Ansible lab environment on AWS, provisioned entirely with T
 │  │   ┌──────────────┐         ┌──────────────┐           │                 │
 │  │   │   Bastion     │         │ NAT Instance │           │    IGW          │
 │  │   │  t3.large     │         │  t3.nano     │           │◄──►Internet    │
-│  │   │  RHEL 9.7     │         │  AL2023      │           │                 │
+│  │   │  RHEL 9.8     │         │  AL2023      │           │                 │
 │  │   │  EIP attached │         │  iptables    │           │                 │
 │  │   └──────────────┘         └──────┬───────┘           │                 │
 │  └───────────────────────────────────┼───────────────────┘                 │
@@ -22,7 +22,7 @@ Automated multi-tier Ansible lab environment on AWS, provisioned entirely with T
 │  │   ┌──────────────────────────────┐│                    │                 │
 │  │   │    Content Server            ││                    │                 │
 │  │   │    (dynamic private IP)       ││                    │                 │
-│  │   │    t3.large / RHEL 9.7       ││                    │                 │
+│  │   │    t3.large / RHEL 9.8       ││                    │                 │
 │  │   │    httpd + Ansible Control   ││                    │                 │
 │  │   │    20GB EBS (ISO storage)    ││                    │                 │
 │  │   └──────────────────────────────┘│                    │                 │

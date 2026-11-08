@@ -30,7 +30,7 @@ output "target_server_ips" {
 }
 
 output "rhel_ami_id" {
-  description = "RHEL 9.7 AMI ID used"
+  description = "RHEL 9.8 AMI ID used"
   value       = data.aws_ami.rhel.id
 }
 
