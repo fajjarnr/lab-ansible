@@ -10,8 +10,20 @@ echo "Checking if ISO already downloaded and verified..."
 if [ -f "${ISO_PATH}" ] && [ -f "${ISO_DIR}/.iso_verified" ]; then
     echo "ISO already downloaded and verified."
 else
-    echo "Downloading Rocky Linux 9.8 DVD ISO (~14GB)..."
-    sudo curl -L -C - --retry 5 --retry-delay 5 -o "${ISO_PATH}" "${ISO_URL}"
+    echo "Downloading Rocky Linux 9.8 DVD ISO (~14GB) via aria2c..."
+    if ! command -v aria2c &> /dev/null; then
+        echo "Installing aria2 from EPEL..."
+        sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+        sudo dnf install -y aria2
+    fi
+
+    sudo aria2c -x 16 -s 16 -k 1M \
+        --file-allocation=falloc \
+        -c \
+        --summary-interval=10 \
+        --dir="${ISO_DIR}" \
+        --out="$(basename "${ISO_PATH}")" \
+        "${ISO_URL}"
 
     echo "Verifying checksum..."
     EXPECTED=$(curl -sL "${CHECKSUM_URL}" | grep -E '^SHA256' | awk '{print $4}')
@@ -46,3 +58,31 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now var-www-html-rhel9.mount
 sudo ln -snf "${MOUNT_DIR}" /var/www/html/rhel
 echo "Local YUM Repo ready at ${MOUNT_DIR} (and /var/www/html/rhel)!"
+
+echo "Configuring local repository for Content Server..."
+if ls /etc/yum.repos.d/redhat-rhui*.repo >/dev/null 2>&1; then
+    echo "Backing up existing RHUI repos..."
+    sudo mkdir -p /etc/yum.repos.d/backup
+    sudo mv /etc/yum.repos.d/redhat-rhui*.repo /etc/yum.repos.d/backup/ 2>/dev/null || true
+fi
+
+sudo tee /etc/yum.repos.d/local-rhel9.repo > /dev/null << 'REPOEOF'
+[local-baseos]
+name=RHEL 9.8 BaseOS - Local ISO
+baseurl=file:///var/www/html/rhel9/BaseOS
+gpgcheck=0
+enabled=1
+sslverify=0
+
+[local-appstream]
+name=RHEL 9.8 AppStream - Local ISO
+baseurl=file:///var/www/html/rhel9/AppStream
+gpgcheck=0
+enabled=1
+sslverify=0
+REPOEOF
+
+echo "Testing Content Server local repository access..."
+sudo dnf clean all
+sudo dnf repolist
+echo "Content Server local repository configured successfully."

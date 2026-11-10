@@ -38,6 +38,40 @@ else
      echo "   [SUCCESS] Content Server Local Repo Setup Complete."
 fi
 
+# -------------------------------------------------------------
+# PHASE 2: Configure Local Yum Repo on Bastion (Idempotent)
+# -------------------------------------------------------------
+echo "=> [Phase 2] Configuring Local Yum Repo on Bastion..."
+
+# Backup existing RHUI repos if present
+if ls /etc/yum.repos.d/redhat-rhui*.repo >/dev/null 2>&1; then
+    echo "   Backing up existing RHUI repos..."
+    sudo mkdir -p /etc/yum.repos.d/backup
+    sudo mv /etc/yum.repos.d/redhat-rhui*.repo /etc/yum.repos.d/backup/ 2>/dev/null || true
+fi
+
+echo "   Writing /etc/yum.repos.d/local-rhel9.repo..."
+sudo tee /etc/yum.repos.d/local-rhel9.repo > /dev/null << REPOEOF
+[local-baseos]
+name=RHEL 9.8 BaseOS - Local Mirror
+baseurl=http://${CONTENT_IP}/rhel9/BaseOS
+gpgcheck=0
+enabled=1
+sslverify=0
+
+[local-appstream]
+name=RHEL 9.8 AppStream - Local Mirror
+baseurl=http://${CONTENT_IP}/rhel9/AppStream
+gpgcheck=0
+enabled=1
+sslverify=0
+REPOEOF
+
+echo "=> Testing Bastion repository access..."
+sudo dnf clean all
+sudo dnf repolist
+echo "   [SUCCESS] Bastion Local Yum Repo configured."
+
 echo "=========================================="
 echo " Background Automation Completed!"
 echo " Finished at: $(date)"
