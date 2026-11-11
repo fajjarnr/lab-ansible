@@ -1,0 +1,18 @@
+---
+- name: Create ansible user
+  hosts: all
+  become: true
+  tasks:
+    - name: Ping all Servers
+      ansible.builtin.ping:
+    - name: Add users
+      ansible.builtin.user:
+        name: redhat
+        shell: /bin/bash
+        groups: adm
+        append: true
+        create_home: yes
+    - name: Add ssh public key
+      ansible.posix.authorized_key:
+        user: redhat
+        key: "{{lookup('file', '/home/runner/.ssh/id_ed25519.pub')}}"
