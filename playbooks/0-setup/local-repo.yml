@@ -4,34 +4,37 @@
 # instead of using Red Hat CDN (internet-dependent).
 
 - name: Configure Local RHEL 9.8 YUM Repository
-  hosts: managed
+  hosts: all
   become: true
 
   vars:
-    repo_base_url: 'http://content.lab.fajjjar.my.id/rhel9'
+    repo_base_url: "http://material.lab.ansible.com/rhel"
 
   tasks:
     - name: Disable all existing RHUI repositories
       ansible.builtin.shell: |
         dnf config-manager --set-disabled '*rhui*' 2>/dev/null || true
-        rm -f /etc/yum.repos.d/redhat-rhui*.repo
+        rm -f /etc/yum.repos.d/redhat*.repo
+        rm -f /etc/yum.repos.d/rhel9.repo
       changed_when: true
 
     - name: Configure Local BaseOS repository
       ansible.builtin.yum_repository:
         name: local-baseos
-        description: 'RHEL 9.8 BaseOS - Local Mirror'
-        baseurl: '{{ repo_base_url }}/BaseOS'
-        gpgcheck: false
+        description: "RHEL 9.8 BaseOS - Local Mirror"
+        baseurl: "{{ repo_base_url }}/BaseOS"
+        gpgcheck: true
+        gpgkey: "{{  repo_base_url  }}/RPM-GPG-KEY-redhat-release"
         enabled: true
         sslverify: false
 
     - name: Configure Local AppStream repository
       ansible.builtin.yum_repository:
         name: local-appstream
-        description: 'RHEL 9.8 AppStream - Local Mirror'
-        baseurl: '{{ repo_base_url }}/AppStream'
-        gpgcheck: false
+        description: "RHEL 9.8 AppStream - Local Mirror"
+        baseurl: "{{ repo_base_url }}/AppStream"
+        gpgcheck: true
+        gpgkey: "{{  repo_base_url  }}/RPM-GPG-KEY-redhat-release"
         enabled: true
         sslverify: false
 
@@ -60,4 +63,4 @@
 
     - name: Show tree version
       ansible.builtin.debug:
-        msg: '{{ inventory_hostname }}: {{ tree_version.stdout }}'
+        msg: "{{ inventory_hostname }}: {{ tree_version.stdout }}"

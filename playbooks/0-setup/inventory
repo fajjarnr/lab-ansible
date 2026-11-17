@@ -1,2 +1,5 @@
 [all]
-server[a:d]
+servera.lab.ansible.com
+serverb.lab.ansible.com
+serverc.lab.ansible.com
+serverd.lab.ansible.com
