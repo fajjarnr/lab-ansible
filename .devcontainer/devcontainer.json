@@ -1,6 +1,6 @@
 {
   "name": "ansible-dev-tools",
-  "image": "registry.redhat.io/ansible-automation-platform-26/ansible-dev-tools-rhel9:latest",
+  "image": "registry.redhat.io/ansible-automation-platform-26/ansible-dev-tools-rhel9:26.1.0-1793290691",
   "containerUser": "root",
   "runArgs": [
     "--cap-add=CAP_MKNOD",
