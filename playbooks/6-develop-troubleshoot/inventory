@@ -1,0 +1,9 @@
+[samba_servers]
+servera.lab.ansible.com
+
+[nfs_servers]
+serverb.lab.ansible.com
+
+[prod_servers]
+servera.lab.ansible.com
+serverb.lab.ansible.com

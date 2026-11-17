@@ -1,0 +1,50 @@
+---
+- name: Configure NFS Server
+  hosts: nfs_servers
+  user: redhat
+  become: true
+  vars:
+    export_directory: /exports
+
+  tasks:
+    - name: Ensure NFS utilities are installed
+      ansible.builtin.dnf:
+        name: nfs-utils
+        state: present
+
+    - name: Create the export directory
+      ansible.builtin.file:
+        path: "{{ export_directory }}"
+        state: directory
+        mode: "0755"
+        owner: nobody
+        group: nobody
+
+    - name: Add the export configuration to /etc/exports
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "{{ export_directory }} *(rw,sync,no_subtree_check)"
+        state: present
+        create: true
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Start firewalld
+      ansible.builtin.systemd_service:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Configure firewall for samba
+      ansible.posix.firewalld:
+        state: enabled
+        permanent: true
+        immediate: true
+        service: nfs
+
+    - name: Ensure NFS services are started and enabled
+      ansible.builtin.systemd_service:
+        name: nfs-server
+        state: started
+        enabled: true

@@ -30,7 +30,8 @@
         "redhat.ansible",
         "redhat.vscode-redhat-account",
         "hashicorp.terraform",
-        "hashicorp.hcl"
+        "hashicorp.hcl",
+        "wholroyd.jinja"
       ]
     }
   }

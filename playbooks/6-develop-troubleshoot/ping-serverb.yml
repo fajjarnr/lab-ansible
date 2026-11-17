@@ -1,0 +1,15 @@
+---
+- name: Ping serverb
+  hosts: serverb.lab.ansible.com
+  user: redhat
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Ping serverb with Ansible
+      ansible.builtin.ping:
+      register: ping_result
+
+    - name: Display ping result
+      ansible.builtin.debug:
+        var: ping_result

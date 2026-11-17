@@ -20,6 +20,7 @@ terraform.rc
 # ──────────────────────────────────────────────
 inventory/
 automation.log
+ansible.log
 ansible-navigator.log
 
 # ──────────────────────────────────────────────
