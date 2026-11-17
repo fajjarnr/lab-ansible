@@ -2,6 +2,10 @@ Host *
   IdentityFile /home/runner/.ssh/id_ed25519.pub
   StrictHostKeyChecking No
 
+Host material
+  HostName 172.25.250.10
+  User redhat
+
 Host servera
   HostName 172.25.250.11
   User redhat
@@ -18,6 +22,3 @@ Host serverd
   HostName 172.25.250.14
   User redhat
 
-Host material
-  HostName 172.25.250.254
-  User redhat
