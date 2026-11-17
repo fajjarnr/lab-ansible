@@ -1,6 +1,6 @@
 Host *
   IdentityFile /home/runner/.ssh/id_ed25519.pub
-  StrictHostKeyCecking No
+  StrictHostKeyChecking No
 
 Host servera
   HostName 172.25.250.11
